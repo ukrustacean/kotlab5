@@ -39,6 +39,7 @@ object Sketch : PApplet() {
     private var directed = true
 
     private val visitedEdges = Array(N) { BooleanArray(N) { false } }
+    private val newNumeration = ArrayList<Int>(N)
     private val visitedNodes = BooleanArray(N) { false }
     private val toVisit = ArrayDeque<Edge>()
 
@@ -74,6 +75,7 @@ object Sketch : PApplet() {
         val v = e?.to
         if (v != null) {
             visitedNodes[v] = true
+            newNumeration.add(v)
             visitedEdges[e.from][e.to] = true
 
             val unvisitedNeighbours = m[v].withIndex().filter { (index, b) -> b && !visitedNodes[index] }
@@ -83,6 +85,16 @@ object Sketch : PApplet() {
         } else {
             visitedNodes.withIndex().find { (_, b) -> !b }?.let { toVisit.add(Edge(it.index, it.index)) }
         }
+    }
+
+    private fun stats() {
+        println()
+        println(visitedEdges
+            .joinToString("\n") { row ->
+                row.joinToString(" ") { "${if (it) '1' else '0'}" } })
+        println()
+        println(newNumeration
+            .mapIndexed { i, v -> "${v + 1} -> ${i + 1}" }.joinToString(", "))
     }
 
     // Printing routines
@@ -175,7 +187,12 @@ object Sketch : PApplet() {
     }
 
     override fun keyPressed() {
-        directed = if (key == ' ') !directed else directed
-        if (key == 's') initSearch() else if (key == 'b') breadthSearchStep() else if (key == 'd') depthSearchStep()
+        when (key) {
+            ' ' -> directed = !directed
+            's' -> initSearch()
+            'b' -> breadthSearchStep()
+            'd' -> depthSearchStep()
+            't' -> stats()
+        }
     }
 }
